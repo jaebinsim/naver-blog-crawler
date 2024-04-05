@@ -19,11 +19,11 @@
 ```json
 [
     {
-        "name": 검색할 키워드의 주제명,
+        "name": "검색할 키워드의 주제명",
         "keywords": [
-            검색어 키워드 1,
-            검색어 키워드 2,
-            검색어 키워드 3
+            "검색어 키워드 1",
+            "검색어 키워드 2",
+            "검색어 키워드 3"
         ]
     }
 ]
@@ -117,5 +117,17 @@ python NaverBlogCrawler.py --output ./results --start_date 2024-04-01 --end_date
 ```
 
 ### "results" 디렉터리 내용
+![image](https://github.com/jaebinsim/naver-blog-crawler/assets/36120710/6a47704f-a63a-4f46-8f5a-bcf5f4f7b7e9)
 
 ### "일본 도쿄 여행" 디렉터리 내용
+![image](https://github.com/jaebinsim/naver-blog-crawler/assets/36120710/e3f25d3d-666b-4989-b2e4-33d732077dd6)
+
+### 각 포스트 크롤링 결과 디렉터리 내용
+![2024-04-06 01 47 14 (1)](https://github.com/jaebinsim/naver-blog-crawler/assets/36120710/13ff6aef-0ec3-4184-900f-7b3a5e08b41a)
+
+### "FastStone Image Viewer" 프로그램을 통해 디렉터리 내 사진들을 한꺼번에 확인 할 수 있습니다
+![2024-04-06 01 55 55 (1)](https://github.com/jaebinsim/naver-blog-crawler/assets/36120710/abed5f97-bac0-4c9a-ab3b-08a62c8b90ea)
+
+### "post_info.txt" 내용
+![2024-04-06 02 01 33 (1)](https://github.com/jaebinsim/naver-blog-crawler/assets/36120710/174e7832-5622-4860-a7ff-f27b32391c96)
+
