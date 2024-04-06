@@ -142,16 +142,16 @@ class Subject:
         logging.info("")
         logging.info(f"Post Job Start: (\"{post_directory_path}\")")
 
-        if not os.path.exists(post_directory_path):
-            logging.info(f"Make Directory")
-            os.makedirs(post_directory_path)
-
         post_url = post['postUrl']
         bic = PostImageCrawler(post_url=post_url)
 
         if bic.get_all_img_urls_len() < self.min_image_count:
             logging.info(f"All Images Len is {bic.get_all_img_urls_len()} Skip")
             return
+
+        if not os.path.exists(post_directory_path):
+            logging.info(f"Make Directory")
+            os.makedirs(post_directory_path)
 
         self.save_post_list_to_json_file(post, os.path.join(post_directory_path, "post_info.json"))
         self.save_post_info_to_txt_file(post, os.path.join(post_directory_path, "post_info.txt"))
