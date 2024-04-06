@@ -9,11 +9,6 @@ from Crawler.BlogImageCrawler import BlogImageCrawler
 
 
 class Subject:
-    name: str
-    keywords: [str]
-    search_date: date
-    output_path: str
-
     def __init__(self,
                  name: str,
                  keywords: [str],
