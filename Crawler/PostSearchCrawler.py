@@ -20,7 +20,7 @@ class PostSearchCrawler:
         self.result_all_posts = []
 
         logging.info("")
-        logging.info(f"Init BSC (keyword: {self.keyword}, search_date: {self.search_date})")
+        logging.info(f"Init PostSearchCrawler (keyword: {self.keyword}, search_date: {self.search_date})")
 
         if not order_by_sim and search_date:
             self.fetch_posts_by_date(search_date=self.search_date)

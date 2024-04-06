@@ -10,7 +10,7 @@ class PostImageCrawler:
         self.post_url = self.adjust_post_url(post_url)
         self.all_img_urls = []
 
-        logging.info(f"Init BIC (post_url: {self.post_url})")
+        logging.info(f"Init PostImageCrawler (post_url: {self.post_url})")
 
         self.fetch_all_img_urls()
 
@@ -20,6 +20,7 @@ class PostImageCrawler:
     def get_all_img_urls_len(self):
         return len(self.all_img_urls)
 
+    @staticmethod
     def adjust_post_url(self, url):
         return url.replace("blog.naver.com", "m.blog.naver.com") if "m.blog.naver.com" not in url else url
 
