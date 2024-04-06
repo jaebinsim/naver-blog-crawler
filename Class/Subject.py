@@ -4,11 +4,13 @@ import re
 from datetime import date, datetime
 
 from Class.LoggingConfig import logging
-from Crawler.BlogSearchCrawler import BlogSearchCrawler
-from Crawler.BlogImageCrawler import BlogImageCrawler
+from Crawler.PostSearchCrawler import PostSearchCrawler
+from Crawler.PostImageCrawler import PostImageCrawler
 
 
 class Subject:
+    min_image_count = 2
+
     def __init__(self,
                  name: str,
                  keywords: [str],
@@ -112,8 +114,8 @@ class Subject:
         if not os.path.exists(self.output_path):
             os.makedirs(self.output_path)
 
-    def get_bsc_result_posts(self, keyword: str):
-        bsc = BlogSearchCrawler(
+    def get_psc_result_posts(self, keyword: str):
+        bsc = PostSearchCrawler(
             keyword=keyword,
             search_date=self.search_date,
             count_per_page=self.count_per_page,
@@ -126,7 +128,7 @@ class Subject:
         all_posts = []
 
         for keyword in self.keywords:
-            posts = self.get_bsc_result_posts(keyword)
+            posts = self.get_psc_result_posts(keyword)
             for post in posts:
                 if post not in all_posts:
                     all_posts.append(post)
@@ -144,16 +146,15 @@ class Subject:
             logging.info(f"Make Directory")
             os.makedirs(post_directory_path)
 
-        self.save_post_list_to_json_file(post, os.path.join(post_directory_path, "post_info.json"))
-
-        self.save_post_info_to_txt_file(post, os.path.join(post_directory_path, "post_info.txt"))
-
         post_url = post['postUrl']
-        bic = BlogImageCrawler(post_url=post_url)
+        bic = PostImageCrawler(post_url=post_url)
 
-        if bic.get_all_img_urls_len() < 2:
+        if bic.get_all_img_urls_len() < self.min_image_count:
             logging.info(f"All Images Len is {bic.get_all_img_urls_len()} Skip")
             return
+
+        self.save_post_list_to_json_file(post, os.path.join(post_directory_path, "post_info.json"))
+        self.save_post_info_to_txt_file(post, os.path.join(post_directory_path, "post_info.txt"))
 
         download_all_img_path = os.path.join(post_directory_path)
         bic.download_all_img(path=download_all_img_path)

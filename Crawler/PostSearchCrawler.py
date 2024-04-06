@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta
 from Class.LoggingConfig import logging
 
 
-class BlogSearchCrawler:
+class PostSearchCrawler:
     def __init__(self,
                  keyword: str,
                  search_date: date,
