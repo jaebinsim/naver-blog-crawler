@@ -6,27 +6,30 @@ from datetime import date, datetime
 from Class.LoggingConfig import logging
 from Crawler.PostSearchCrawler import PostSearchCrawler
 from Crawler.PostImageCrawler import PostImageCrawler
+from Crawler.PostTextCrawler import PostTextCrawler
 
 
 class Subject:
-    min_image_count = 2
-
     def __init__(self,
                  name: str,
                  keywords: [str],
                  search_date: date,
                  output_path: str,
                  count_per_page: int,
+                 include_content_keyword: bool,
                  order_by_sim: bool = False,
-                 max_search_page: int = 1
+                 max_search_page: int = 1,
+                 min_image_count: int = 2
                  ):
         self.name = name
         self.keywords = keywords
         self.search_date = search_date
         self.output_path = output_path
         self.count_per_page = count_per_page
+        self.include_content_keyword = include_content_keyword
         self.order_by_sim = order_by_sim
         self.max_search_page = max_search_page
+        self.min_image_count = min_image_count
 
         self.complete_posts_json_file_path = os.path.join(self.output_path, "complete_posts.json")
 
@@ -48,11 +51,14 @@ class Subject:
             self.update()
 
     def create(self):
-        logging.info(f"Start Create")
+        logging.info("Start Create")
 
         self.make_subject_directory()
 
         all_posts = self.get_all_posts_from_keywords()
+
+        if len(all_posts) is 0:
+            logging.info("All Post Len is 0 Skip")
 
         for post in all_posts:
             self.post_job(post)
@@ -63,10 +69,13 @@ class Subject:
         pass
 
     def update(self):
-        logging.info(f"Start Update")
+        logging.info("Start Update")
 
         complete_posts = self.load_complete_posts_from_json_file(self.complete_posts_json_file_path)
         all_posts = self.get_all_posts_from_keywords()
+
+        if len(all_posts) is 0:
+            logging.info("All Post Len is 0 Skip")
 
         complete_post_urls = {post.get("postUrl") for post in complete_posts}
         all_post_urls = {post.get("postUrl") for post in all_posts}
@@ -143,21 +152,33 @@ class Subject:
         logging.info(f"Post Job Start: (\"{post_directory_path}\")")
 
         post_url = post['postUrl']
-        bic = PostImageCrawler(post_url=post_url)
 
-        if bic.get_all_img_urls_len() < self.min_image_count:
-            logging.info(f"All Images Len is {bic.get_all_img_urls_len()} Skip")
+        pic = PostImageCrawler(post_url=post_url)
+        if pic.get_all_img_urls_len() < self.min_image_count:
+            logging.info(f"All Images Len is {pic.get_all_img_urls_len()} Skip")
             return
 
+        if self.include_content_keyword:
+            ptc = PostTextCrawler(post_url=post_url)
+            if not ptc.is_include_keyword(keywords=self.keywords):
+                logging.info("Post does not include specified keywords. Skip")
+                return
+
         if not os.path.exists(post_directory_path):
-            logging.info(f"Make Directory")
+            logging.info("Make Directory")
             os.makedirs(post_directory_path)
 
         self.save_post_list_to_json_file(post, os.path.join(post_directory_path, "post_info.json"))
         self.save_post_info_to_txt_file(post, os.path.join(post_directory_path, "post_info.txt"))
 
+        if self.include_content_keyword:
+            self.save_post_matching_contexts_to_txt_file(
+                matching_contexts=ptc.get_include_keyword_matching_contexts(keywords=self.keywords),
+                filename=os.path.join(post_directory_path, "post_matching_contexts.txt")
+            )
+
         download_all_img_path = os.path.join(post_directory_path)
-        bic.download_all_img(path=download_all_img_path)
+        pic.download_all_img(path=download_all_img_path)
 
     @staticmethod
     def save_post_list_to_json_file(post: list, filename: str):
@@ -220,6 +241,25 @@ class Subject:
 
                 mobile_label = f"Blog Search URL (Mobile) ({mobile_keyword})"
                 file.write(f"\n{mobile_label}:\n{mobile_url}\n")
+
+    @staticmethod
+    def save_post_matching_contexts_to_txt_file(matching_contexts, filename: str):
+        with open(filename, 'w', encoding='utf-8') as file:
+            contexts_by_keyword = {}
+
+            for context_dict in matching_contexts:
+                for keyword, context in context_dict.items():
+                    if keyword not in contexts_by_keyword:
+                        contexts_by_keyword[keyword] = []
+
+                    pattern = re.compile(rf'({re.escape(keyword)})', flags=re.IGNORECASE)
+                    bolded_context = pattern.sub(r'**\1**', context)
+                    contexts_by_keyword[keyword].append(bolded_context)
+
+            for keyword, contexts in contexts_by_keyword.items():
+                file.write(f"[{keyword}]\n")
+                for context in contexts:
+                    file.write(f"{context}\n\n")
 
     @staticmethod
     def get_tabs_for_windows(label):

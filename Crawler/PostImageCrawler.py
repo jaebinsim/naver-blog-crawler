@@ -21,7 +21,7 @@ class PostImageCrawler:
         return len(self.all_img_urls)
 
     @staticmethod
-    def adjust_post_url(self, url):
+    def adjust_post_url(url):
         return url.replace("blog.naver.com", "m.blog.naver.com") if "m.blog.naver.com" not in url else url
 
     def fetch_all_img_urls(self):

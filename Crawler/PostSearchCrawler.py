@@ -8,7 +8,7 @@ class PostSearchCrawler:
     def __init__(self,
                  keyword: str,
                  search_date: date,
-                 count_per_page: int = 1000,
+                 count_per_page: int = 10,
                  order_by_sim: bool = False,
                  max_search_page: int = 1
                  ):
@@ -23,17 +23,17 @@ class PostSearchCrawler:
         logging.info(f"Init PostSearchCrawler (keyword: {self.keyword}, search_date: {self.search_date})")
 
         if not order_by_sim and search_date:
-            self.fetch_posts_by_date(search_date=self.search_date)
+            self.fetch_posts_by_date()
         elif order_by_sim:
-            self.fetch_posts_by_date_sim(search_date=self.search_date, max_search_page=self.max_search_page)
+            self.fetch_posts_by_date_sim()
 
     def get_result_all_posts(self):
         return self.result_all_posts
 
-    def fetch_posts_by_date(self, search_date):
+    def fetch_posts_by_date(self):
         page = 1
 
-        while True:
+        while self.max_search_page is None or page <= self.max_search_page:
             logging.info(f"Get Response (keyword: {self.keyword}, page: {page}, count_per_page: {self.count_per_page})")
             response = self.get_response(keyword=self.keyword, order_by='recentdate', page=page,
                                          count_per_page=self.count_per_page)
@@ -47,17 +47,17 @@ class PostSearchCrawler:
                 addDate = post.get('addDate')
                 if addDate:
                     addDate = addDate.date()
-                    if addDate == search_date and post not in self.result_all_posts:
+                    if addDate == self.search_date and post not in self.result_all_posts:
                         self.result_all_posts.append(post)
-                    elif addDate < search_date:
+                    elif addDate < self.search_date:
                         return
 
             page += 1
 
-    def fetch_posts_by_date_sim(self, search_date, max_search_page):
+    def fetch_posts_by_date_sim(self):
         page = 1
 
-        while page <= max_search_page:
+        while page <= self.max_search_page:
             logging.info(f"Get Response (keyword: {self.keyword}, page: {page}, count_per_page: {self.count_per_page})")
             response = self.get_response(keyword=self.keyword, order_by="sim", page=page,
                                          count_per_page=self.count_per_page)
@@ -69,13 +69,13 @@ class PostSearchCrawler:
                 if addDate:
                     addDate = addDate.date()
 
-                    if search_date is not None and addDate == search_date and post not in self.result_all_posts:
+                    if self.search_date is not None and addDate == self.search_date and post not in self.result_all_posts:
                         self.result_all_posts.append(post)
 
-                    elif search_date is None and post not in self.result_all_posts:
+                    elif self.search_date is None and post not in self.result_all_posts:
                         self.result_all_posts.append(post)
 
-            if page == max_search_page:
+            if page == self.max_search_page:
                 break
 
             page += 1
